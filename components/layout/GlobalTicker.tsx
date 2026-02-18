@@ -3,24 +3,20 @@
 /**
  * GlobalTicker — Full-viewport-width marquee bar
  *
- * Displays real-time PSA 10 card price changes at the
- * very top of every page. Inspired by collectpure.com.
- *
- * Architecture:
- *  - The ticker track is duplicated (×2) so the marquee
- *    appears seamless as it loops.
- *  - Hover pauses the animation for readability.
- *  - Edge fade gradients mask the left/right overflow.
+ * Displays live-simulated PSA card prices at the top of every page.
+ * Runs its own independent price simulation via setInterval so the ticker
+ * stays fresh regardless of the active page.
  */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { colors } from "@/lib/theme";
+import { tickPrice } from "@/lib/market-data";
 import type { TickerItem } from "@/lib/ticker-data";
 
 // ─────────────────────────────────────────────────────────
-// Sub-component: single ticker item
+// Sub-component: single ticker chip
 // ─────────────────────────────────────────────────────────
 
 interface TickerChipProps {
@@ -34,7 +30,7 @@ function TickerChip({ item }: TickerChipProps) {
 
   return (
     <div
-      className="flex items-center gap-[6px] px-4 select-none cursor-pointer group"
+      className="flex items-center gap-[6px] px-4 select-none cursor-pointer"
       title={`${item.name} · PSA ${item.grade} · ${item.set}`}
     >
       {/* Symbol */}
@@ -79,10 +75,11 @@ function TickerChip({ item }: TickerChipProps) {
         ) : (
           <Minus size={10} strokeWidth={2.5} />
         )}
-        {sign}{item.changePct.toFixed(2)}%
+        {sign}
+        {item.changePct.toFixed(2)}%
       </span>
 
-      {/* Separator dot */}
+      {/* Separator */}
       <span
         className="text-[10px]"
         style={{ color: colors.border }}
@@ -103,8 +100,30 @@ interface GlobalTickerProps {
 }
 
 export function GlobalTicker({ items }: GlobalTickerProps) {
-  // Duplicate the items so the marquee loops seamlessly
-  const doubled = [...items, ...items];
+  const [liveItems, setLiveItems] = useState<TickerItem[]>(items);
+
+  // Independent live simulation — updates ~3 items every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveItems((prev) =>
+        prev.map((item) =>
+          Math.random() > 0.5
+            ? item
+            : tickPrice({
+                ...item,
+                volume24h: 1,
+                high24h: item.price * 1.05,
+                low24h: item.price * 0.95,
+                category: "pokemon",
+              })
+        )
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const doubled = [...liveItems, ...liveItems];
 
   return (
     <div
