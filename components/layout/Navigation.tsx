@@ -13,22 +13,78 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 import {
   BarChart2,
   Vault,
   TrendingUp,
   Search,
   Bell,
-  User,
+  Wallet,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { colors, layout } from "@/lib/theme";
+import { shortAddress } from "@/lib/web3";
 
 interface NavLink {
   href: string;
   label: string;
   icon: React.ReactNode;
+}
+
+// ─────────────────────────────────────────────────────────
+// Wallet Button — custom RainbowKit ConnectButton
+// ─────────────────────────────────────────────────────────
+
+function WalletButton() {
+  const { address, isConnected } = useAccount();
+
+  return (
+    <ConnectButton.Custom>
+      {({ openConnectModal, openAccountModal, mounted }) => {
+        if (!mounted) return null;
+
+        if (!isConnected || !address) {
+          return (
+            <button
+              onClick={openConnectModal}
+              className="flex items-center gap-[6px] rounded-[10px] px-3 py-[7px] text-[13px] font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+              style={{
+                background: colors.green,
+                color: colors.textInverse,
+              }}
+            >
+              <Wallet size={14} strokeWidth={2.5} />
+              Connect Wallet
+            </button>
+          );
+        }
+
+        return (
+          <button
+            onClick={openAccountModal}
+            className="flex items-center gap-2 rounded-[10px] border px-3 py-[6px] text-[13px] font-medium transition-all duration-150 hover:border-[#3E3E3E]"
+            style={{
+              borderColor: colors.border,
+              background: colors.surface,
+              color: colors.textPrimary,
+            }}
+          >
+            {/* Green connected dot */}
+            <span
+              className="h-[7px] w-[7px] rounded-full"
+              style={{ background: colors.green }}
+            />
+            <span className="tabular-nums" style={{ color: colors.textSecondary }}>
+              {shortAddress(address)}
+            </span>
+          </button>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
 }
 
 const NAV_LINKS: NavLink[] = [
@@ -149,18 +205,8 @@ export function Navigation() {
           <Bell size={16} strokeWidth={2} />
         </button>
 
-        {/* Account avatar */}
-        <button
-          className="flex h-8 w-8 items-center justify-center rounded-full border transition-colors hover:border-[#3E3E3E]"
-          style={{
-            borderColor: colors.border,
-            backgroundColor: colors.surface,
-            color: colors.textSecondary,
-          }}
-          aria-label="Account"
-        >
-          <User size={15} strokeWidth={2} />
-        </button>
+        {/* Wallet connect */}
+        <WalletButton />
       </div>
     </header>
   );
