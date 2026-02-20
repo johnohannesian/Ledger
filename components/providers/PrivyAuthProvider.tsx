@@ -11,6 +11,7 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 import { AuthProvider } from "@/lib/auth";
+import { PortfolioProvider } from "@/lib/portfolio-context";
 import { baseSepolia } from "wagmi/chains";
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "PRIVY_APP_ID_PLACEHOLDER";
@@ -42,7 +43,9 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       <AuthProvider>
-        {children}
+        <PortfolioProvider>
+          {children}
+        </PortfolioProvider>
       </AuthProvider>
     </PrivyProvider>
   );

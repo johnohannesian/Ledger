@@ -11,12 +11,13 @@
  */
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { X, Search, Plus, Camera, Upload, TrendingUp, TrendingDown, ArrowDownLeft, ArrowUpRight, Tag } from "lucide-react";
+import { X, Search, Plus, Camera, Upload, ArrowDownLeft, ArrowUpRight, Tag } from "lucide-react";
 import Image from "next/image";
 
 import { ASSETS, tickPrice, generateHistory, type TimeRange, type AssetData } from "@/lib/market-data";
 import { PriceChart } from "@/components/market/PriceChart";
-import { VAULT_HOLDINGS, type VaultHolding } from "@/lib/vault-data";
+import { type VaultHolding } from "@/lib/vault-data";
+import { usePortfolio } from "@/lib/portfolio-context";
 import { colors, layout, psaGradeColor, zIndex } from "@/lib/theme";
 import { formatCurrency, cn } from "@/lib/utils";
 
@@ -55,7 +56,7 @@ interface DepositForm {
 // ─────────────────────────────────────────────────────────
 
 export default function PortfolioPage() {
-  const [holdings, setHoldings] = useState<VaultHolding[]>(VAULT_HOLDINGS);
+  const { holdings, addHolding, updateHolding } = usePortfolio();
   const [assets, setAssets] = useState(ASSETS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [modalState, setModalState] = useState<ModalState>(null);
@@ -108,13 +109,10 @@ export default function PortfolioPage() {
     if (!modalState || modalState.type !== "list") return;
     const price = parseFloat(modalState.price);
     const holding = holdings.find((h) => h.id === modalState.holdingId);
-    setHoldings((prev) =>
-      prev.map((h) =>
-        h.id === modalState.holdingId
-          ? { ...h, status: "listed", listingPrice: isNaN(price) ? undefined : price }
-          : h
-      )
-    );
+    updateHolding(modalState.holdingId, {
+      status: "listed",
+      listingPrice: isNaN(price) ? undefined : price,
+    });
     if (holding) {
       setActivities((prev) => [...prev, {
         id: `a${Date.now()}`,
@@ -130,11 +128,7 @@ export default function PortfolioPage() {
 
   function handleCancelListing(id: string) {
     const holding = holdings.find((h) => h.id === id);
-    setHoldings((prev) =>
-      prev.map((h) =>
-        h.id === id ? { ...h, status: "in_vault", listingPrice: undefined } : h
-      )
-    );
+    updateHolding(id, { status: "in_vault", listingPrice: undefined });
     if (holding) {
       setActivities((prev) => [...prev, {
         id: `a${Date.now()}`,
@@ -154,11 +148,7 @@ export default function PortfolioPage() {
   function confirmWithdrawal() {
     if (!modalState || modalState.type !== "withdraw") return;
     const holding = holdings.find((h) => h.id === modalState.holdingId);
-    setHoldings((prev) =>
-      prev.map((h) =>
-        h.id === modalState.holdingId ? { ...h, status: "in_transit" } : h
-      )
-    );
+    updateHolding(modalState.holdingId, { status: "in_transit" });
     if (holding) {
       setActivities((prev) => [...prev, {
         id: `a${Date.now()}`,
@@ -196,7 +186,7 @@ export default function PortfolioPage() {
       certNumber: form.certNumber || `PSA ${Math.floor(Math.random() * 90000000 + 10000000)}`,
       imageUrl: form.photoUrl ?? `/cards/${asset.symbol}.svg`,
     };
-    setHoldings((prev) => [newHolding, ...prev]);
+    addHolding(newHolding);
     setSelectedId(newHolding.id);
     setActivities((prev) => [...prev, {
       id: `a${Date.now()}`,

@@ -5,6 +5,7 @@ import { CheckCircle, Lock, Loader2, ExternalLink } from "lucide-react";
 import { colors } from "@/lib/theme";
 import { formatCurrency } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
+import { usePortfolio } from "@/lib/portfolio-context";
 import type { AssetData } from "@/lib/market-data";
 
 interface TradePanelProps {
@@ -23,6 +24,7 @@ interface OrderResult {
 
 export function TradePanel({ asset, onRequestSignIn }: TradePanelProps) {
   const { user, isAuthenticated, updateBalance } = useAuth();
+  const { addHolding } = usePortfolio();
 
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [orderType, setOrderType] = useState<"market" | "limit">("market");
@@ -87,8 +89,25 @@ export function TradePanel({ asset, onRequestSignIn }: TradePanelProps) {
       }
 
       // Update local USD balance optimistically
-      if (isBuy) updateBalance(-total);
-      else updateBalance(total);
+      if (isBuy) {
+        updateBalance(-total);
+        // Add to portfolio holdings so /portfolio reflects the purchase
+        addHolding({
+          id: `trade-${Date.now()}`,
+          name: asset.name,
+          symbol: asset.symbol,
+          grade: asset.grade,
+          set: asset.set,
+          year: parseInt(asset.set.match(/\d{4}/)?.[0] ?? "2024"),
+          acquisitionPrice: estPrice,
+          status: "in_vault",
+          dateDeposited: new Date().toISOString().slice(0, 10),
+          certNumber: `PSA ${Math.floor(10_000_000 + Math.random() * 90_000_000)}`,
+          imageUrl: `/cards/${asset.symbol}.svg`,
+        });
+      } else {
+        updateBalance(total);
+      }
 
       setResult(data);
       setStage("confirmed");
