@@ -3,15 +3,17 @@
 /**
  * LEDGER — Auth Context
  *
- * Provides user identity and account balance throughout the app.
- * The cash balance is denominated in USD — the underlying settlement
- * mechanism is an implementation detail hidden from the user.
+ * Bridges Privy's auth state into a clean useAuth() hook.
+ * The rest of the app never imports from @privy-io/react-auth directly —
+ * everything goes through useAuth(), making it easy to swap providers.
  *
- * Replace createMockSession() with real auth (Privy, Auth.js, etc.)
- * when connecting to the backend.
+ * cashBalance is local state for now. Wire to your database in production:
+ *   - On login: fetch user record → set cashBalance
+ *   - On trade: PATCH /api/users/:id/balance
  */
 
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { usePrivy, type User as PrivyUser } from "@privy-io/react-auth";
 
 // ─────────────────────────────────────────────────────────
 // Types
@@ -22,14 +24,15 @@ export interface User {
   name: string;
   email: string;
   initials: string;
-  /** Available buying power in USD */
+  /** Available buying power in USD — replace with DB value in production */
   cashBalance: number;
 }
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
-  signIn: (email: string) => Promise<void>;
+  /** Opens Privy's login modal (email OTP + Google) */
+  signIn: () => void;
   signOut: () => void;
   updateBalance: (delta: number) => void;
 }
@@ -41,23 +44,44 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 // ─────────────────────────────────────────────────────────
-// Mock session factory — swap with real auth later
+// Build our User from Privy's user object
 // ─────────────────────────────────────────────────────────
 
-function createMockUser(email: string): User {
-  const name = email.split("@")[0].replace(/[._]/g, " ");
-  const words = name.split(" ");
-  const initials = words
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
+function buildUser(privyUser: PrivyUser, cashBalance: number): User {
+  const email =
+    privyUser.email?.address ??
+    (privyUser.google as { email?: string } | undefined)?.email ??
+    "";
+
+  const googleName =
+    (privyUser.google as { name?: string } | undefined)?.name ?? "";
+
+  let name: string;
+  let initials: string;
+
+  if (googleName) {
+    name = googleName;
+    const parts = googleName.split(" ");
+    initials = parts
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? "")
+      .join("");
+  } else {
+    const emailName = email.split("@")[0].replace(/[._]/g, " ");
+    const words = emailName.split(" ");
+    name = words.map((w) => (w[0]?.toUpperCase() ?? "") + w.slice(1)).join(" ");
+    initials = words
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join("");
+  }
 
   return {
-    id: `usr_${Math.random().toString(36).slice(2, 9)}`,
-    name: words.map((w) => w[0]?.toUpperCase() + w.slice(1)).join(" "),
+    id: privyUser.id,
+    name: name || email,
     email,
     initials: initials || "?",
-    cashBalance: 24_500.0,
+    cashBalance,
   };
 }
 
@@ -66,27 +90,29 @@ function createMockUser(email: string): User {
 // ─────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const { user: privyUser, authenticated, login, logout } = usePrivy();
 
-  const signIn = useCallback(async (email: string) => {
-    // Simulate network latency
-    await new Promise((r) => setTimeout(r, 800));
-    setUser(createMockUser(email));
-  }, []);
+  // TODO: replace with value fetched from DB on login
+  const [cashBalance, setCashBalance] = useState(24_500.0);
+
+  const user =
+    authenticated && privyUser ? buildUser(privyUser, cashBalance) : null;
+
+  const signIn = useCallback(() => {
+    login();
+  }, [login]);
 
   const signOut = useCallback(() => {
-    setUser(null);
-  }, []);
+    logout();
+  }, [logout]);
 
   const updateBalance = useCallback((delta: number) => {
-    setUser((prev) =>
-      prev ? { ...prev, cashBalance: Math.max(0, prev.cashBalance + delta) } : prev
-    );
+    setCashBalance((prev) => Math.max(0, prev + delta));
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, signIn, signOut, updateBalance }}
+      value={{ user, isAuthenticated: authenticated && !!user, signIn, signOut, updateBalance }}
     >
       {children}
     </AuthContext.Provider>

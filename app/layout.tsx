@@ -3,7 +3,7 @@
  *
  * Hierarchy (top → bottom):
  *  ┌──────────────────────────────────────────┐
- *  │  GlobalTicker  (36px, fixed, z:110)      │  ← marquee price bar
+ *  │  GlobalTicker  (40px, fixed, z:110)      │  ← marquee price bar
  *  ├──────────────────────────────────────────┤
  *  │  Navigation    (56px, fixed, z:100)      │  ← nav + search + account
  *  ├──────────────────────────────────────────┤
@@ -20,8 +20,7 @@ import "./globals.css";
 
 import { GlobalTicker } from "@/components/layout/GlobalTicker";
 import { Navigation } from "@/components/layout/Navigation";
-import { Web3Provider } from "@/components/providers/Web3Provider";
-import { AuthProvider } from "@/lib/auth";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 import { TOP_PSA10_ASSETS } from "@/lib/ticker-data";
 import { layout } from "@/lib/theme";
 
@@ -67,8 +66,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased">
-        <Web3Provider>
-        <AuthProvider>
+        <ClientProviders>
           {/* ── Fixed chrome: ticker + nav ── */}
           <div
             className="fixed left-0 right-0 top-0"
@@ -78,7 +76,7 @@ export default function RootLayout({
             <Navigation />
           </div>
 
-          {/* ── Page content — offset by chrome height (36 + 56 = 92px) ── */}
+          {/* ── Page content — offset by chrome height (40px ticker + 56px nav) ── */}
           <main
             style={{
               paddingTop: layout.chromeHeight,
@@ -87,8 +85,7 @@ export default function RootLayout({
           >
             {children}
           </main>
-        </AuthProvider>
-        </Web3Provider>
+        </ClientProviders>
       </body>
     </html>
   );
