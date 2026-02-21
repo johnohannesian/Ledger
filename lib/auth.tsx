@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * LEDGER — Auth Context
+ * TASH — Auth Context
  *
  * Bridges Privy's auth state into a clean useAuth() hook.
  * The rest of the app never imports from @privy-io/react-auth directly —

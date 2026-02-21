@@ -1,5 +1,5 @@
 /**
- * LEDGER — Mock Ticker Data
+ * TASH — Mock Ticker Data
  *
  * Simulates real-time PSA 10 card price feeds.
  * Replace with WebSocket / API integration in production.

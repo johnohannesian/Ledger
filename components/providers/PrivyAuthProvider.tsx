@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * LEDGER — Privy + Auth Provider
+ * TASH — Privy + Auth Provider
  *
  * Wraps the entire app with Privy (real auth) and our AuthProvider.
  * Privy handles identity, email OTP, Google OAuth, and embedded wallets.
@@ -26,7 +26,7 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
 
         appearance: {
           theme: "dark",
-          accentColor: "#00C805",       // Ledger green
+          accentColor: "#00C805",       // tash green
           showWalletLoginFirst: false,
           logo: undefined,              // add /logo.png once you have one
         },

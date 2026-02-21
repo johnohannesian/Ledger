@@ -1,5 +1,5 @@
 /**
- * LEDGER — Design Token System
+ * TASH — Design Token System
  *
  * Single source of truth for all design decisions.
  * CSS custom properties are the runtime values; this
@@ -259,7 +259,7 @@ export const breakpoints = {
 // PSA Grade Config
 // ─────────────────────────────────────────────────────────
 
-/** Minimum PSA grade allowed for listing on Ledger */
+/** Minimum PSA grade allowed for listing on tash */
 export const PSA_MIN_GRADE = 8;
 
 /** PSA grades eligible for trading */

@@ -62,7 +62,7 @@ export function SignInModal({ onClose }: SignInModalProps) {
           className="text-[20px] font-bold tracking-tight"
           style={{ color: colors.textPrimary }}
         >
-          Sign in to Ledger
+          Sign in to tash
         </h2>
         <p className="mt-1 text-[13px]" style={{ color: colors.textSecondary }}>
           Trade and manage your card portfolio.
@@ -102,7 +102,7 @@ export function SignInModal({ onClose }: SignInModalProps) {
         </div>
 
         <p className="mt-4 text-center text-[11px]" style={{ color: colors.textMuted }}>
-          By continuing, you agree to Ledger&apos;s{" "}
+          By continuing, you agree to tash&apos;s{" "}
           <span style={{ color: colors.textSecondary, cursor: "pointer" }}>Terms of Service</span>
           {" "}and{" "}
           <span style={{ color: colors.textSecondary, cursor: "pointer" }}>Privacy Policy</span>.

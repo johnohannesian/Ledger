@@ -1,5 +1,5 @@
 /**
- * LEDGER — Extended Market Data
+ * TASH — Extended Market Data
  *
  * Generates mock historical prices, order books, and live simulation data.
  * Replace generators with real WebSocket / REST API in production.

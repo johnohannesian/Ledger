@@ -1,5 +1,5 @@
 /**
- * LEDGER — Root Layout
+ * TASH — Root Layout
  *
  * Hierarchy (top → bottom):
  *  ┌──────────────────────────────────────────┐
@@ -30,8 +30,8 @@ import { layout } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: {
-    default: "Ledger — Trading Card Exchange",
-    template: "%s · Ledger",
+    default: "tash — Trading Card Exchange",
+    template: "%s · tash",
   },
   description:
     "Institutional-grade trading for PSA 8+ graded cards. Real-time price discovery, order books, and secure vault storage.",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "collectibles market",
   ],
   openGraph: {
-    title: "Ledger — Trading Card Exchange",
+    title: "tash — Trading Card Exchange",
     description: "Institutional-grade trading for PSA-graded collectibles.",
     type: "website",
   },

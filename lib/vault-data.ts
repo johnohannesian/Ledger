@@ -1,5 +1,5 @@
 /**
- * LEDGER — Vault Holdings Data
+ * TASH — Vault Holdings Data
  *
  * Static mock data for the authenticated user's vault.
  * `currentValue` is NOT stored here — it is derived live
@@ -25,7 +25,7 @@ export interface VaultHolding {
 export function getScannedHoldings(): VaultHolding[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("ledger-scanned-cards");
+    const raw = localStorage.getItem("tash-scanned-cards");
     return raw ? (JSON.parse(raw) as VaultHolding[]) : [];
   } catch {
     return [];

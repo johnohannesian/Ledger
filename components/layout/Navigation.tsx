@@ -175,20 +175,20 @@ export function Navigation() {
         }}
       >
         {/* ── Wordmark ─────────────────────────────── */}
-        <Link href="/" className="flex items-center gap-2 no-underline" aria-label="Ledger home">
+        <Link href="/" className="flex items-center gap-2 no-underline" aria-label="tash home">
           <div
             className="flex items-center justify-center rounded-[8px]"
             style={{ width: 28, height: 28, backgroundColor: colors.green }}
           >
             <span className="text-[14px] font-black" style={{ color: colors.textInverse }}>
-              L
-            </span>
+              t
+</span>
           </div>
           <span
             className="text-[18px] font-bold tracking-tight"
             style={{ color: colors.textPrimary, letterSpacing: "-0.03em" }}
           >
-            Ledger
+            tash
           </span>
         </Link>
 

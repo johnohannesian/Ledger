@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * LEDGER — Card Scan Page
+ * TASH — Card Scan Page
  *
  * Mobile-first 4-stage flow:
  *   1. Capture  — Camera or Upload tab
@@ -21,7 +21,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { colors, layout } from "@/lib/theme";
+import { formatCurrency } from "@/lib/utils";
 import { type VaultHolding } from "@/lib/vault-data";
+import { type CardPricing } from "@/app/api/scan/route";
 
 // ─────────────────────────────────────────────────────────
 // Types
@@ -102,6 +104,8 @@ export default function ScanPage() {
   // AI result
   const [result, setResult] = useState<ScanResult | null>(null);
   const [matchedSymbol, setMatchedSymbol] = useState<string | null>(null);
+  const [cardImageUrl, setCardImageUrl] = useState<string | null>(null);
+  const [pricing, setPricing] = useState<CardPricing | null>(null);
 
   // UI state
   const [error, setError] = useState<string | null>(null);
@@ -217,6 +221,8 @@ export default function ScanPage() {
 
       setResult(data.card);
       setMatchedSymbol(data.matchedSymbol ?? null);
+      setCardImageUrl(data.imageUrl ?? null);
+      setPricing(data.pricing ?? null);
       setStage("result");
     } catch {
       setError("Network error — please try again");
@@ -239,15 +245,15 @@ export default function ScanPage() {
       status: "in_transit",
       dateDeposited: new Date().toISOString().split("T")[0],
       certNumber: "Pending grading",
-      imageUrl: thumbDataUrl ?? "",
+      imageUrl: cardImageUrl ?? thumbDataUrl ?? "",
     };
 
     try {
       const existing: VaultHolding[] = JSON.parse(
-        localStorage.getItem("ledger-scanned-cards") ?? "[]"
+        localStorage.getItem("tash-scanned-cards") ?? "[]"
       );
       localStorage.setItem(
-        "ledger-scanned-cards",
+        "tash-scanned-cards",
         JSON.stringify([...existing, newHolding])
       );
     } catch {
@@ -265,6 +271,8 @@ export default function ScanPage() {
     setThumbDataUrl(null);
     setResult(null);
     setMatchedSymbol(null);
+    setCardImageUrl(null);
+    setPricing(null);
     setError(null);
     setCameraError(null);
     setStage("capture");
@@ -329,7 +337,9 @@ export default function ScanPage() {
           <ResultStage
             result={result}
             thumbDataUrl={thumbDataUrl}
+            cardImageUrl={cardImageUrl}
             matchedSymbol={matchedSymbol}
+            pricing={pricing}
             onAddToVault={addToVault}
             onScanAgain={reset}
           />
@@ -772,7 +782,9 @@ function AnalyzingStage({ blobUrl }: { blobUrl: string }) {
 interface ResultStageProps {
   result: ScanResult;
   thumbDataUrl: string | null;
+  cardImageUrl: string | null;
   matchedSymbol: string | null;
+  pricing: CardPricing | null;
   onAddToVault: () => void;
   onScanAgain: () => void;
 }
@@ -780,10 +792,14 @@ interface ResultStageProps {
 function ResultStage({
   result,
   thumbDataUrl,
+  cardImageUrl,
   matchedSymbol,
+  pricing,
   onAddToVault,
   onScanAgain,
 }: ResultStageProps) {
+  // Prefer official database image; fall back to user's captured photo
+  const displayImage = cardImageUrl ?? thumbDataUrl;
   const gc = gradeColor(result.estimatedGrade);
   const conf = confidenceLabel(result.confidence);
   const confPct = Math.round(result.confidence * 100);
@@ -815,8 +831,8 @@ function ResultStage({
           border: `1px solid ${colors.border}`,
         }}
       >
-        {/* Thumbnail */}
-        {thumbDataUrl ? (
+        {/* Card image — official DB image or captured photo fallback */}
+        {displayImage ? (
           <div
             style={{
               width: 60,
@@ -829,7 +845,7 @@ function ResultStage({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={thumbDataUrl}
+              src={displayImage}
               alt={result.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
@@ -860,7 +876,7 @@ function ResultStage({
                 lineHeight: 1.2,
               }}
             >
-              {result.name}
+              {result.year ? `${result.year} ` : ""}{result.name}
             </h2>
             {/* Grade badge */}
             <div
@@ -880,7 +896,6 @@ function ResultStage({
 
           <p style={{ fontSize: 12, color: colors.textMuted, margin: "4px 0 0" }}>
             {result.set}
-            {result.year ? ` · ${result.year}` : ""}
             {result.cardNumber ? ` · #${result.cardNumber}` : ""}
           </p>
 
@@ -940,6 +955,42 @@ function ResultStage({
           ))}
         </div>
       </div>
+
+      {/* Market pricing */}
+      {pricing && (pricing.low || pricing.mid || pricing.high) && (
+        <div
+          style={{
+            background: colors.surface,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 10,
+            padding: "12px 14px",
+            marginBottom: 16,
+          }}
+        >
+          <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: colors.textMuted, marginBottom: 10 }}>
+            Market Pricing
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+            {([
+              { label: pricing.labels[0], value: pricing.low },
+              { label: pricing.labels[1], value: pricing.mid },
+              { label: pricing.labels[2], value: pricing.high },
+            ] as { label: string; value: string | null }[]).map(({ label, value }) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: colors.textMuted, margin: "0 0 4px" }}>
+                  {label}
+                </p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: value ? colors.textPrimary : colors.textMuted, margin: 0 }}>
+                  {value ? formatCurrency(parseFloat(value)) : "—"}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 10, color: colors.textMuted, marginTop: 8, marginBottom: 0, textAlign: "right" }}>
+            Avg. market · {pricing.source}
+          </p>
+        </div>
+      )}
 
       {/* Confidence bar */}
       <div

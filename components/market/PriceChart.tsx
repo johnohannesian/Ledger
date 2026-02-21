@@ -57,7 +57,7 @@ export function PriceChart({
   onRangeChange,
 }: PriceChartProps) {
   const color = isUp ? colors.green : colors.red;
-  const gradientId = `ledger-gradient-${isUp ? "up" : "down"}`;
+  const gradientId = `tash-gradient-${isUp ? "up" : "down"}`;
 
   const prices = data.map((d) => d.price);
   const min = Math.min(...prices) * 0.997;

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * LEDGER — Market Home
+ * TASH — Market Home
  *
  * Two views toggled by the user:
  *   Simple   — portfolio-first casual browse (default)
@@ -79,13 +79,13 @@ export default function MarketPage() {
 
   // Persist view preference
   useEffect(() => {
-    const stored = localStorage.getItem("ledger-view-mode") as ViewMode | null;
+    const stored = localStorage.getItem("tash-view-mode") as ViewMode | null;
     if (stored === "simple" || stored === "advanced") setViewMode(stored);
   }, []);
 
   function handleViewChange(m: ViewMode) {
     setViewMode(m);
-    localStorage.setItem("ledger-view-mode", m);
+    localStorage.setItem("tash-view-mode", m);
   }
 
   const selected = assets.find((a) => a.symbol === selectedSymbol) ?? assets[0];

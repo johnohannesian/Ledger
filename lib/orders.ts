@@ -1,5 +1,5 @@
 /**
- * LEDGER — EIP-712 Order Utilities
+ * TASH — EIP-712 Order Utilities
  *
  * Defines the typed-data domain and types that match LedgerExchange.sol.
  * Used by both the API (server-side signing) and the frontend.

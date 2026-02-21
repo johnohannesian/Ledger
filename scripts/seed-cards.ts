@@ -1,5 +1,5 @@
 /**
- * LEDGER — Card Catalog Seeder
+ * TASH — Card Catalog Seeder
  *
  * Pulls Holo Rare / Ultra Rare cards from the Pokémon TCG API
  * and upserts them into Supabase with realistic PSA pricing.

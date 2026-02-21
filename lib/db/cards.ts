@@ -1,5 +1,5 @@
 /**
- * LEDGER — Database query helpers for card catalog.
+ * TASH — Database query helpers for card catalog.
  *
  * These functions hit Supabase and return typed results.
  * They are safe to call from server components, API routes,

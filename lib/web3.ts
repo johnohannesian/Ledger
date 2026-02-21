@@ -1,5 +1,5 @@
 /**
- * LEDGER — Web3 Configuration
+ * TASH — Web3 Configuration
  *
  * Wagmi + RainbowKit config targeting Base mainnet with Base Sepolia as testnet.
  * Uses WalletConnect v2 for mobile wallet support.
@@ -14,12 +14,12 @@ import { base, baseSepolia } from "wagmi/chains";
 import { http } from "wagmi";
 
 const projectId =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "ledger-dev-placeholder";
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "tash-dev-placeholder";
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
 export const wagmiConfig = getDefaultConfig({
-  appName: "Ledger — Trading Card Exchange",
+  appName: "tash — Trading Card Exchange",
   projectId,
   chains: [base, baseSepolia],
   transports: {

@@ -1,5 +1,5 @@
 {
-  "name": "ledger-app",
+  "name": "tash",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,6 +17,8 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@rainbow-me/rainbowkit": "^2.2.10",
+    "@stripe/react-stripe-js": "^5.6.0",
+    "@stripe/stripe-js": "^8.7.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.90.21",
     "class-variance-authority": "^0.7.1",
@@ -28,6 +30,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
+    "stripe": "^20.3.1",
     "tailwind-merge": "^3.4.1",
     "viem": "^2.46.2",
     "wagmi": "^2.19.5"
